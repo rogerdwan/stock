@@ -2,7 +2,6 @@ package stock.db.entity;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 
 @Entity
 public class Price {

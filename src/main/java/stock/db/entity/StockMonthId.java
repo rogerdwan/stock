@@ -6,18 +6,19 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class StockDateId implements Serializable {
+public class StockMonthId implements Serializable {
 
   /**
    * 
    */
-  private static final long serialVersionUID = -8821248668806424631L;
+  private static final long serialVersionUID = 3950903959334539362L;
+  /**
+   * 
+   */
   @Column(name = "year")
   Integer year;
   @Column(name = "month")
   Integer month;
-  @Column(name = "day")
-  Integer day;
   @Column(name = "number")
   Integer number;
 
@@ -37,14 +38,6 @@ public class StockDateId implements Serializable {
     this.month = month;
   }
 
-  public Integer getDay() {
-    return day;
-  }
-
-  public void setDay(Integer day) {
-    this.day = day;
-  }
-
   public Integer getNumber() {
     return number;
   }
@@ -55,15 +48,13 @@ public class StockDateId implements Serializable {
 
   @Override
   public String toString() {
-    return "StockDateId [year=" + year + ", month=" + month + ", day=" + day + ", number=" + number
-        + "]";
+    return "StockDateId [year=" + year + ", month=" + month + ", number=" + number + "]";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((day == null) ? 0 : day.hashCode());
     result = prime * result + ((month == null) ? 0 : month.hashCode());
     result = prime * result + ((number == null) ? 0 : number.hashCode());
     result = prime * result + ((year == null) ? 0 : year.hashCode());
@@ -75,10 +66,7 @@ public class StockDateId implements Serializable {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    StockDateId other = (StockDateId) obj;
-    if (day == null) {
-      if (other.day != null) return false;
-    } else if (!day.equals(other.day)) return false;
+    StockMonthId other = (StockMonthId) obj;
     if (month == null) {
       if (other.month != null) return false;
     } else if (!month.equals(other.month)) return false;

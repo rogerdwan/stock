@@ -7,8 +7,9 @@ import java.util.Map;
 public enum UrlPattern {
 
   PRICE(
-      "http://5850web.moneydj.com/z/zc/zc0/zc05/CZCPP.djbcd?a=%d&b=E&c=E&d=E&e=E&f=E&g=0&h=E&i=0");
+      "http://5850web.moneydj.com/z/zc/zc0/zc05/CZCPP.djbcd?a=%d&b=E&c=E&d=E&e=E&f=E&g=0&h=E&i=6"),
 
+  Earnings("http://5850web.moneydj.com/z/zc/zch/zch_%d.djhtm");
   String pattern;
 
   UrlPattern(String pattern) {

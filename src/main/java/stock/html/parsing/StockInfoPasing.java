@@ -1,6 +1,7 @@
 package stock.html.parsing;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +16,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import stock.StockConstant;
+import stock.db.entity.Earnings;
 import stock.db.entity.Price;
 import stock.db.entity.Stock;
 import stock.db.entity.StockDateId;
+import stock.db.entity.StockMonthId;
+import stock.db.repo.EarningsRepo;
 import stock.db.repo.PriceRepo;
 import stock.db.repo.StockRepo;
 
@@ -28,17 +32,57 @@ public class StockInfoPasing {
   private PriceRepo priceRepo;
   @Inject
   private StockRepo stockRepo;
+  @Inject
+  private EarningsRepo earningsRepo;
 
   @Scheduled(fixedDelay = 60 * 60 * 1000 * 24)
   public void parseData() {
     List<Integer> stockNums = stockRepo.getNumbers();
     // parsePrice(UrlPattern.PRICE.getUrl(stockNums));
+    parseEarnings(UrlPattern.Earnings.getUrl(stockNums));
     // parseStockNumber("http://isin.twse.com.tw/isin/C_public.jsp?strMode=2");
+  }
+
+  public void parseEarnings(Map<Integer, String> urls) {
+    for (Map.Entry<Integer, String> entity : urls.entrySet()) {
+      parseEarnings(entity.getKey(), entity.getValue());
+    }
   }
 
   public void parsePrice(Map<Integer, String> urls) {
     for (Map.Entry<Integer, String> entity : urls.entrySet()) {
       parsePrice(entity.getKey(), entity.getValue());
+    }
+  }
+
+  public void parseEarnings(Integer stockNum, String url) {
+    List<Earnings> entities = new ArrayList<>();
+    try {
+      Document doc = Jsoup.connect(url).timeout(10000).get();
+      Elements elements = doc.getElementsByTag("table").get(2).getElementsByTag("tr");
+      for (Element element : elements) {
+        if (!element.attr("id").contains("oScroll")) {
+          Elements tds = element.getElementsByTag("td");
+          Earnings entity = new Earnings();
+          StockMonthId id = new StockMonthId();
+          entity.setId(id);
+          String[] yearMonth = tds.get(0).text().split("/");
+          id.setYear(removeWebSpaceInteger(yearMonth[0]));
+          id.setMonth(removeWebSpaceInteger(yearMonth[1]));
+          id.setNumber(stockNum);
+          entity.setEarnings(removeWebSpaceLong(tds.get(1).text()) * 1000);
+          entity.setIncreaseRateM(removeWebSpacePercentage(tds.get(2).text()));
+          entity.setLastYear(removeWebSpaceLong(tds.get(3).text()) * 1000);
+          entity.setIncreaseRateY(removeWebSpacePercentage(tds.get(4).text()));
+          entity.setTotalEarningsY(removeWebSpaceLong(tds.get(5).text()) * 1000);
+          entity.setTotalIncreaseRateY(removeWebSpacePercentage(tds.get(6).text()));
+          entities.add(entity);
+        }
+      }
+      earningsRepo.save(entities);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 
@@ -60,7 +104,9 @@ public class StockInfoPasing {
       for (int i = 0; i < dates.length; i++) {
         Price entity = new Price();
         StockDateId id = new StockDateId();
-        id.setDate(dates[i]);
+        id.setDay(removeWebSpaceInteger(dates[i].substring(5, 7)));
+        id.setMonth(removeWebSpaceInteger(dates[i].substring(3, 5)));
+        id.setYear(removeWebSpaceInteger(dates[i].substring(0, 3)));
         id.setNumber(stockNum);
         entity.setPriceId(id);
         entity.setPrice(Double.valueOf(prices[i]));
@@ -119,7 +165,34 @@ public class StockInfoPasing {
   }
 
   public static Integer removeWebSpaceInteger(String value) {
-    return Integer.valueOf(value.replace(String.valueOf((char) 160), " ").trim());
+    value = value.replace(String.valueOf((char) 160), " ").replace(",", "").trim();
+    if (value.isEmpty()) {
+      return 0;
+    }
+    return Integer.valueOf(value);
+  }
+
+  public static Long removeWebSpaceLong(String value) {
+    value = value.replace(String.valueOf((char) 160), " ").replace(",", "").trim();
+    if (value.isEmpty()) {
+      return 0L;
+    }
+    return Long.valueOf(value);
+  }
+
+  public static Double removeWebSpacePercentage(String value) {
+    try {
+      value = value.replace(String.valueOf((char) 160), " ").replace(".", "").replace(",", "")
+          .replace("%", "").trim();
+      if (value.isEmpty()) {
+        return 0.0;
+      }
+      return new BigDecimal(value).setScale(4).divide(new BigDecimal("100")).doubleValue();
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+      System.out.println(value);
+    }
+    return null;
   }
 }
 

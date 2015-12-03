@@ -6,18 +6,19 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class StockDateId implements Serializable {
+public class StockQuarterId implements Serializable {
 
   /**
    * 
    */
-  private static final long serialVersionUID = -8821248668806424631L;
+  private static final long serialVersionUID = -3009788005461154881L;
+  /**
+   * 
+   */
   @Column(name = "year")
   Integer year;
-  @Column(name = "month")
-  Integer month;
-  @Column(name = "day")
-  Integer day;
+  @Column(name = "quarter")
+  Integer quarter;
   @Column(name = "number")
   Integer number;
 
@@ -29,20 +30,12 @@ public class StockDateId implements Serializable {
     this.year = year;
   }
 
-  public Integer getMonth() {
-    return month;
+  public Integer getQuarter() {
+    return quarter;
   }
 
-  public void setMonth(Integer month) {
-    this.month = month;
-  }
-
-  public Integer getDay() {
-    return day;
-  }
-
-  public void setDay(Integer day) {
-    this.day = day;
+  public void setQuarter(Integer quarter) {
+    this.quarter = quarter;
   }
 
   public Integer getNumber() {
@@ -54,18 +47,11 @@ public class StockDateId implements Serializable {
   }
 
   @Override
-  public String toString() {
-    return "StockDateId [year=" + year + ", month=" + month + ", day=" + day + ", number=" + number
-        + "]";
-  }
-
-  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((day == null) ? 0 : day.hashCode());
-    result = prime * result + ((month == null) ? 0 : month.hashCode());
     result = prime * result + ((number == null) ? 0 : number.hashCode());
+    result = prime * result + ((quarter == null) ? 0 : quarter.hashCode());
     result = prime * result + ((year == null) ? 0 : year.hashCode());
     return result;
   }
@@ -75,20 +61,22 @@ public class StockDateId implements Serializable {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    StockDateId other = (StockDateId) obj;
-    if (day == null) {
-      if (other.day != null) return false;
-    } else if (!day.equals(other.day)) return false;
-    if (month == null) {
-      if (other.month != null) return false;
-    } else if (!month.equals(other.month)) return false;
+    StockQuarterId other = (StockQuarterId) obj;
     if (number == null) {
       if (other.number != null) return false;
     } else if (!number.equals(other.number)) return false;
+    if (quarter == null) {
+      if (other.quarter != null) return false;
+    } else if (!quarter.equals(other.quarter)) return false;
     if (year == null) {
       if (other.year != null) return false;
     } else if (!year.equals(other.year)) return false;
     return true;
+  }
+
+  @Override
+  public String toString() {
+    return "StockQuarterId [year=" + year + ", quarter=" + quarter + ", number=" + number + "]";
   }
 
 }

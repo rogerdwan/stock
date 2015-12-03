@@ -7,68 +7,68 @@ import javax.persistence.Entity;
 public class Earnings {
 
   @EmbeddedId
-  private StockDateId id;
-  private Integer earnings;
-  private Integer increaseQ;
-  private Integer lastYear;
-  private Integer increaseY;
-  private Integer totalEarningsY;
-  private Integer totalIncreaseY;
+  private StockMonthId id;
+  private Long earnings;
+  private Double increaseRateM;
+  private Long lastYear;
+  private Double increaseRateY;
+  private Long totalEarningsY;
+  private Double totalIncreaseRateY;
 
-  public StockDateId getId() {
+  public StockMonthId getId() {
     return id;
   }
 
-  public void setId(StockDateId id) {
+  public void setId(StockMonthId id) {
     this.id = id;
   }
 
-  public Integer getEarnings() {
+  public Long getEarnings() {
     return earnings;
   }
 
-  public void setEarnings(Integer earnings) {
+  public void setEarnings(Long earnings) {
     this.earnings = earnings;
   }
 
-  public Integer getIncreaseQ() {
-    return increaseQ;
+  public Double getIncreaseRateM() {
+    return increaseRateM;
   }
 
-  public void setIncreaseQ(Integer increaseQ) {
-    this.increaseQ = increaseQ;
+  public void setIncreaseRateM(Double increaseRateM) {
+    this.increaseRateM = increaseRateM;
   }
 
-  public Integer getLastYear() {
+  public Long getLastYear() {
     return lastYear;
   }
 
-  public void setLastYear(Integer lastYear) {
+  public void setLastYear(Long lastYear) {
     this.lastYear = lastYear;
   }
 
-  public Integer getIncreaseY() {
-    return increaseY;
+  public Double getIncreaseRateY() {
+    return increaseRateY;
   }
 
-  public void setIncreaseY(Integer increaseY) {
-    this.increaseY = increaseY;
+  public void setIncreaseRateY(Double increaseRateY) {
+    this.increaseRateY = increaseRateY;
   }
 
-  public Integer getTotalEarningsY() {
+  public Long getTotalEarningsY() {
     return totalEarningsY;
   }
 
-  public void setTotalEarningsY(Integer totalEarningsY) {
+  public void setTotalEarningsY(Long totalEarningsY) {
     this.totalEarningsY = totalEarningsY;
   }
 
-  public Integer getTotalIncreaseY() {
-    return totalIncreaseY;
+  public Double getTotalIncreaseRateY() {
+    return totalIncreaseRateY;
   }
 
-  public void setTotalIncreaseY(Integer totalIncreaseY) {
-    this.totalIncreaseY = totalIncreaseY;
+  public void setTotalIncreaseRateY(Double totalIncreaseRateY) {
+    this.totalIncreaseRateY = totalIncreaseRateY;
   }
 
   @Override
@@ -77,11 +77,11 @@ public class Earnings {
     int result = 1;
     result = prime * result + ((earnings == null) ? 0 : earnings.hashCode());
     result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result = prime * result + ((increaseQ == null) ? 0 : increaseQ.hashCode());
-    result = prime * result + ((increaseY == null) ? 0 : increaseY.hashCode());
+    result = prime * result + ((increaseRateM == null) ? 0 : increaseRateM.hashCode());
+    result = prime * result + ((increaseRateY == null) ? 0 : increaseRateY.hashCode());
     result = prime * result + ((lastYear == null) ? 0 : lastYear.hashCode());
     result = prime * result + ((totalEarningsY == null) ? 0 : totalEarningsY.hashCode());
-    result = prime * result + ((totalIncreaseY == null) ? 0 : totalIncreaseY.hashCode());
+    result = prime * result + ((totalIncreaseRateY == null) ? 0 : totalIncreaseRateY.hashCode());
     return result;
   }
 
@@ -97,30 +97,29 @@ public class Earnings {
     if (id == null) {
       if (other.id != null) return false;
     } else if (!id.equals(other.id)) return false;
-    if (increaseQ == null) {
-      if (other.increaseQ != null) return false;
-    } else if (!increaseQ.equals(other.increaseQ)) return false;
-    if (increaseY == null) {
-      if (other.increaseY != null) return false;
-    } else if (!increaseY.equals(other.increaseY)) return false;
+    if (increaseRateM == null) {
+      if (other.increaseRateM != null) return false;
+    } else if (!increaseRateM.equals(other.increaseRateM)) return false;
+    if (increaseRateY == null) {
+      if (other.increaseRateY != null) return false;
+    } else if (!increaseRateY.equals(other.increaseRateY)) return false;
     if (lastYear == null) {
       if (other.lastYear != null) return false;
     } else if (!lastYear.equals(other.lastYear)) return false;
     if (totalEarningsY == null) {
       if (other.totalEarningsY != null) return false;
     } else if (!totalEarningsY.equals(other.totalEarningsY)) return false;
-    if (totalIncreaseY == null) {
-      if (other.totalIncreaseY != null) return false;
-    } else if (!totalIncreaseY.equals(other.totalIncreaseY)) return false;
+    if (totalIncreaseRateY == null) {
+      if (other.totalIncreaseRateY != null) return false;
+    } else if (!totalIncreaseRateY.equals(other.totalIncreaseRateY)) return false;
     return true;
   }
 
   @Override
   public String toString() {
-    return "Earnings [id=" + id + ", earnings=" + earnings + ", increaseQ=" + increaseQ
-        + ", lastYear=" + lastYear + ", increaseY=" + increaseY + ", totalEarningsY="
-        + totalEarningsY + ", totalIncreaseY=" + totalIncreaseY + "]";
+    return "Earnings [id=" + id + ", earnings=" + earnings + ", increaseRateM=" + increaseRateM
+        + ", lastYear=" + lastYear + ", increaseRateY=" + increaseRateY + ", totalEarningsY="
+        + totalEarningsY + ", totalIncreaseRateY=" + totalIncreaseRateY + "]";
   }
-
 
 }
