@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -17,11 +21,14 @@ import org.springframework.stereotype.Service;
 
 import stock.StockConstant;
 import stock.db.entity.Earnings;
+import stock.db.entity.Performance;
 import stock.db.entity.Price;
 import stock.db.entity.Stock;
 import stock.db.entity.StockDateId;
 import stock.db.entity.StockMonthId;
+import stock.db.entity.StockQuarterId;
 import stock.db.repo.EarningsRepo;
+import stock.db.repo.PerformanceRepo;
 import stock.db.repo.PriceRepo;
 import stock.db.repo.StockRepo;
 
@@ -34,24 +41,119 @@ public class StockInfoPasing {
   private StockRepo stockRepo;
   @Inject
   private EarningsRepo earningsRepo;
+  @Inject
+  private PerformanceRepo performanceRepo;
 
   @Scheduled(fixedDelay = 60 * 60 * 1000 * 24)
   public void parseData() {
     List<Integer> stockNums = stockRepo.getNumbers();
-    // parsePrice(UrlPattern.PRICE.getUrl(stockNums));
-    parseEarnings(UrlPattern.Earnings.getUrl(stockNums));
+    parsePerformance(UrlPattern.PERFORMANCE.getUrl(stockNums));
+    parseEarnings(UrlPattern.EARNINGS.getUrl(stockNums));
+    parsePrice(UrlPattern.PRICE.getUrl(stockNums));
     // parseStockNumber("http://isin.twse.com.tw/isin/C_public.jsp?strMode=2");
   }
 
-  public void parseEarnings(Map<Integer, String> urls) {
+  public void parsePerformance(Map<Integer, String> urls) {
+    ThreadPoolExecutor tpe =
+        new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(10));
     for (Map.Entry<Integer, String> entity : urls.entrySet()) {
-      parseEarnings(entity.getKey(), entity.getValue());
+      tpe.execute(new Runnable() {
+
+        @Override
+        public void run() {
+          parsePerformance(entity.getKey(), entity.getValue());
+        }
+      });
+    }
+    try {
+      tpe.shutdown();
+      while (true) {
+        if (tpe.awaitTermination(1, TimeUnit.SECONDS)) {
+          System.out.println("Job all done!");
+          break;
+        }
+      }
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  public void parseEarnings(Map<Integer, String> urls) {
+    ThreadPoolExecutor tpe =
+        new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(10));
+    for (Map.Entry<Integer, String> entity : urls.entrySet()) {
+      tpe.execute(new Runnable() {
+
+        @Override
+        public void run() {
+          parseEarnings(entity.getKey(), entity.getValue());
+        }
+      });
+    }
+    try {
+      tpe.shutdown();
+      while (true) {
+        if (tpe.awaitTermination(1, TimeUnit.SECONDS)) {
+          System.out.println("Job all done!");
+          break;
+        }
+      }
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 
   public void parsePrice(Map<Integer, String> urls) {
+    ThreadPoolExecutor tpe =
+        new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(10));
     for (Map.Entry<Integer, String> entity : urls.entrySet()) {
-      parsePrice(entity.getKey(), entity.getValue());
+      tpe.execute(new Runnable() {
+
+        @Override
+        public void run() {
+          parsePrice(entity.getKey(), entity.getValue());
+        }
+      });
+    }
+    try {
+      tpe.shutdown();
+      while (true) {
+        if (tpe.awaitTermination(1, TimeUnit.SECONDS)) {
+          System.out.println("Job all done!");
+          break;
+        }
+      }
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  public void parsePerformance(Integer stockNum, String url) {
+    List<Performance> entities = new ArrayList<>();
+    try {
+      Document doc = Jsoup.connect(url).timeout(10000).get();
+      Elements elements = doc.getElementsByTag("table").get(2).getElementsByTag("tr");
+      for (Element element : elements) {
+        if (!element.attr("id").contains("oScroll")) {
+          Elements tds = element.getElementsByTag("td");
+          Performance entity = new Performance();
+          StockQuarterId id = new StockQuarterId();
+          entity.setId(id);
+          String[] yearQuarter = tds.get(0).text().split("\\.");
+          id.setYear(removeWebSpaceInteger(yearQuarter[0]));
+          id.setQuarter(removeWebSpaceInteger(yearQuarter[1].substring(0, 1)));
+          id.setNumber(stockNum);
+          entity.setRps(removeWebSpaceDouble(tds.get(5).text()));
+          entity.setEps(removeWebSpaceDouble(tds.get(7).text()));
+          entities.add(entity);
+        }
+      }
+      performanceRepo.save(entities);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -180,6 +282,23 @@ public class StockInfoPasing {
     return Long.valueOf(value);
   }
 
+  public static Double removeWebSpaceDouble(String value) {
+    try {
+      value = value.replace(String.valueOf((char) 160), " ").replace(",", "").trim();
+      if (value.isEmpty()) {
+        return 0.0;
+      }
+      return Double.valueOf(value);
+    } catch (NumberFormatException e) {
+      if (value.equals("N/A")) {
+        return 0.0;
+      }
+      e.printStackTrace();
+      System.out.println(value);
+    }
+    return null;
+  }
+
   public static Double removeWebSpacePercentage(String value) {
     try {
       value = value.replace(String.valueOf((char) 160), " ").replace(".", "").replace(",", "")
@@ -193,6 +312,10 @@ public class StockInfoPasing {
       System.out.println(value);
     }
     return null;
+  }
+
+  public static void main(String[] args) {
+    System.out.println("104.Q4".split(".")[1]);
   }
 }
 

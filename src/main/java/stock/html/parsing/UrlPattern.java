@@ -9,7 +9,9 @@ public enum UrlPattern {
   PRICE(
       "http://5850web.moneydj.com/z/zc/zc0/zc05/CZCPP.djbcd?a=%d&b=E&c=E&d=E&e=E&f=E&g=0&h=E&i=6"),
 
-  Earnings("http://5850web.moneydj.com/z/zc/zch/zch_%d.djhtm");
+  EARNINGS("http://5850web.moneydj.com/z/zc/zch/zch_%d.djhtm"),
+
+  PERFORMANCE("http://5850web.moneydj.com/z/zc/zcd/zcd_%d.djhtm");
   String pattern;
 
   UrlPattern(String pattern) {
