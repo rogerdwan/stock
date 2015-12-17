@@ -1,4 +1,4 @@
-package stock.html.parsing;
+package stock.service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.Map;
 public enum UrlPattern {
 
   PRICE(
-      "http://5850web.moneydj.com/z/zc/zc0/zc05/CZCPP.djbcd?a=%d&b=E&c=E&d=E&e=E&f=E&g=0&h=E&i=6"),
+      "http://5850web.moneydj.com/z/zc/zc0/zc05/CZCPP.djbcd?a=%d&b=E&c=E&d=E&e=E&f=E&g=0&h=E&i=2"),
 
   EARNINGS("http://5850web.moneydj.com/z/zc/zch/zch_%d.djhtm"),
 

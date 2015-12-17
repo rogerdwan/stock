@@ -1,4 +1,4 @@
-package stock.html.parsing;
+package stock.service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -44,7 +44,7 @@ public class StockInfoPasing {
   @Inject
   private PerformanceRepo performanceRepo;
 
-  @Scheduled(fixedDelay = 60 * 60 * 1000 * 24)
+  // @Scheduled(fixedDelay = 60 * 60 * 1000 * 24)
   public void parseData() {
     List<Integer> stockNums = stockRepo.getNumbers();
     parsePerformance(UrlPattern.PERFORMANCE.getUrl(stockNums));
@@ -55,7 +55,8 @@ public class StockInfoPasing {
 
   public void parsePerformance(Map<Integer, String> urls) {
     ThreadPoolExecutor tpe =
-        new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(10));
+        new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());
+    System.out.println("Start performance parsing");
     for (Map.Entry<Integer, String> entity : urls.entrySet()) {
       tpe.execute(new Runnable() {
 
@@ -77,11 +78,13 @@ public class StockInfoPasing {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+
+    System.out.println("End performance parsing");
   }
 
   public void parseEarnings(Map<Integer, String> urls) {
     ThreadPoolExecutor tpe =
-        new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(10));
+        new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());
     for (Map.Entry<Integer, String> entity : urls.entrySet()) {
       tpe.execute(new Runnable() {
 
@@ -107,7 +110,7 @@ public class StockInfoPasing {
 
   public void parsePrice(Map<Integer, String> urls) {
     ThreadPoolExecutor tpe =
-        new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(10));
+        new ThreadPoolExecutor(10, 20, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());
     for (Map.Entry<Integer, String> entity : urls.entrySet()) {
       tpe.execute(new Runnable() {
 
@@ -216,9 +219,11 @@ public class StockInfoPasing {
       }
       priceRepo.save(entities);
     } catch (IOException e) {
+      parsePrice(stockNum, url);
       System.out.println("===========================" + stockNum + "=====================");
       e.printStackTrace();
     } catch (Exception e) {
+      parsePrice(stockNum, url);
       System.out.println("===========================" + stockNum + "=====================");
       e.printStackTrace();
     }
