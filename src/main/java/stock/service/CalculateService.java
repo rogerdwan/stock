@@ -15,7 +15,7 @@ public class CalculateService {
   @Inject
   private EarningsService earningsService;
 
-  @PostConstruct
+  // @PostConstruct
   public void getStockByPerformanceAndEarnings() {
     List<Integer> stockNum = performanceService.getContiniousPlusEightQ();
     System.out.println(stockNum.size());

@@ -7,11 +7,13 @@ import java.util.Map;
 public enum UrlPattern {
 
   PRICE(
-      "http://5850web.moneydj.com/z/zc/zc0/zc05/CZCPP.djbcd?a=%d&b=E&c=E&d=E&e=E&f=E&g=0&h=E&i=2"),
+      "http://5850web.moneydj.com/z/zc/zc0/zc05/CZCPP.djbcd?a=%d&b=E&c=E&d=E&e=E&f=E&g=0&h=E&i=5"),
 
   EARNINGS("http://5850web.moneydj.com/z/zc/zch/zch_%d.djhtm"),
 
-  PERFORMANCE("http://5850web.moneydj.com/z/zc/zcd/zcd_%d.djhtm");
+  PERFORMANCE("http://5850web.moneydj.com/z/zc/zcd/zcd_%d.djhtm"),
+
+  CAPITAL("http://5850web.moneydj.com/z/zc/zcb/zcb_%d.djhtm");
   String pattern;
 
   UrlPattern(String pattern) {
