@@ -30,6 +30,14 @@ public class StockMonthId implements Serializable {
     this.year = year;
   }
 
+  public Integer getTaiwanYear() {
+    return year + 1911;
+  }
+
+  public void setTaiwanYear(Integer year) {
+    this.year = year - 1911;
+  }
+
   public Integer getMonth() {
     return month;
   }

@@ -13,7 +13,15 @@ public enum UrlPattern {
 
   PERFORMANCE("http://5850web.moneydj.com/z/zc/zcd/zcd_%d.djhtm"),
 
-  CAPITAL("http://5850web.moneydj.com/z/zc/zcb/zcb_%d.djhtm");
+  CAPITAL("http://5850web.moneydj.com/z/zc/zcb/zcb_%d.djhtm"),
+
+  CASHFLOWQ("http://5850web.moneydj.com/z/zc/zc3/zc3_%d.djhtm"),
+
+  CAPITALSTRUCTUREQ("http://5850web.moneydj.com/z/zc/zcr/zcr_%d.djhtm"),
+
+  BALANCEDSHEETQ("http://5850web.moneydj.com/z/zc/zcp/zcpa/zcpa_%d.djhtm"),
+
+  INCOMESTATEMENTQ("http://5850web.moneydj.com/z/zc/zcq/zcq_%d.djhtm");
   String pattern;
 
   UrlPattern(String pattern) {

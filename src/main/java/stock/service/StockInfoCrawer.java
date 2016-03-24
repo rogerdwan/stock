@@ -20,6 +20,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import stock.StockConstant;
+import stock.crawer.BalancedShheetQCrawer;
+import stock.crawer.CapitalStructureQCrawer;
+import stock.crawer.CashFlowQCrawer;
+import stock.crawer.IncomeStatementQCrawer;
 import stock.db.entity.Capital;
 import stock.db.entity.Earnings;
 import stock.db.entity.Performance;
@@ -48,15 +52,31 @@ public class StockInfoCrawer {
   private PerformanceRepo performanceRepo;
   @Inject
   private CapitalRepo capitalRepo;
+  @Inject
+  private CashFlowQCrawer cashFlowQCrawer;
+  @Inject
+  private CapitalStructureQCrawer capitalStructureQCrawer;
+  @Inject
+  private BalancedShheetQCrawer balancedSheetQCrawer;
+  @Inject
+  private IncomeStatementQCrawer incomeStatementQCrawer;
 
-  @Scheduled(fixedDelay = 60 * 60 * 1000 * 24)
+//  @Scheduled(fixedDelay = 60 * 60 * 1000 * 24)
   public void parseData() {
+    System.out.println("start crawer");
+    parseStockNumber("http://isin.twse.com.tw/isin/C_public.jsp?strMode=2");
+    parseStockNumberType2("http://isin.twse.com.tw/isin/C_public.jsp?strMode=4");
     List<Integer> stockNums = stockRepo.getNumbers();
     // parsePerformance(UrlPattern.PERFORMANCE.getUrl(stockNums));
-    parseEarnings(UrlPattern.EARNINGS.getUrl(stockNums));
+    // parseEarnings(UrlPattern.EARNINGS.getUrl(stockNums));
     parseCapital(UrlPattern.CAPITAL.getUrl(stockNums));
-    parsePrice(UrlPattern.PRICE.getUrl(stockNums));
-    // parseStockNumber("http://isin.twse.com.tw/isin/C_public.jsp?strMode=2");
+    // parsePrice(UrlPattern.PRICE.getUrl(stockNums));
+
+    // cashFlowQCrawer.craw(UrlPattern.CASHFLOWQ.getUrl(stockNums));
+    // capitalStructureQCrawer.craw(UrlPattern.CAPITALSTRUCTUREQ.getUrl(stockNums));
+    // balancedSheetQCrawer.craw(UrlPattern.BALANCEDSHEETQ.getUrl(stockNums));
+    // incomeStatementQCrawer.craw(UrlPattern.INCOMESTATEMENTQ.getUrl(stockNums));
+
   }
 
   public void parsePerformance(Map<Integer, String> urls) {
@@ -144,26 +164,9 @@ public class StockInfoCrawer {
     ThreadPoolExecutor tpe =
         new ThreadPoolExecutor(1, 2, 6, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());
     for (Map.Entry<Integer, String> entity : urls.entrySet()) {
-      tpe.execute(new Runnable() {
-
-        @Override
-        public void run() {
-          parsePrice(entity.getKey(), entity.getValue());
-        }
-      });
+      parsePrice(entity.getKey(), entity.getValue());
     }
-    try {
-      tpe.shutdown();
-      while (true) {
-        if (tpe.awaitTermination(1, TimeUnit.SECONDS)) {
-          System.out.println("Job all done!");
-          break;
-        }
-      }
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    System.out.println("Job all done!");
   }
 
   public void parsePerformance(Integer stockNum, String url) {
@@ -246,6 +249,9 @@ public class StockInfoCrawer {
       String datas[] = body.split(" ");
       String dates[] = datas[0].split(",");
       String prices[] = datas[1].split(",");
+      if (datas.length < 2) {
+        stockRepo.delete(stockNum);
+      }
       if (dates.length != prices.length) {
         throw new IllegalArgumentException("Array size should be same");
       }
@@ -262,12 +268,24 @@ public class StockInfoCrawer {
       }
       priceRepo.save(entities);
     } catch (IOException e) {
-      parsePrice(stockNum, url);
+      try {
+        Thread.sleep(3000);
+      } catch (InterruptedException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
       System.out.println("===========================" + stockNum + "=====================");
+      parsePrice(stockNum, url);
       e.printStackTrace();
     } catch (Exception e) {
-      parsePrice(stockNum, url);
+      try {
+        Thread.sleep(3000);
+      } catch (InterruptedException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
       System.out.println("===========================" + stockNum + "=====================");
+      parsePrice(stockNum, url);
       e.printStackTrace();
     }
   }
@@ -291,11 +309,11 @@ public class StockInfoCrawer {
         id.setNumber(stockNum);
         id.setYear(year);
         entity.setId(id);
-        entity.setCashIncrease(removeWebSpaceDouble(tds.get(1).text()) * 100000000);
+        entity.setCashIncrease((long) (removeWebSpaceDouble(tds.get(1).text()) * 100000000));
         entity.setCashRatio(removeWebSpacePercentage(tds.get(2).text()));
-        entity.setProfitIncreate(removeWebSpaceDouble(tds.get(3).text()) * 100000000);
+        entity.setProfitIncreate((long) (removeWebSpaceDouble(tds.get(3).text()) * 100000000));
         entity.setProfitRatio(removeWebSpacePercentage(tds.get(4).text()));
-        entity.setOther(removeWebSpaceDouble(tds.get(5).text()) * 100000000);
+        entity.setOther((long) (removeWebSpaceDouble(tds.get(5).text()) * 100000000));
         entity.setOtherRatio(removeWebSpacePercentage(tds.get(6).text()));
         entities.add(entity);
       }
@@ -313,6 +331,7 @@ public class StockInfoCrawer {
 
   public void parseStockNumber(String url) {
     try {
+      stockRepo.deleteAll();
       List<Stock> entities = new ArrayList<>();
       int type = StockConstant.TYPE_EXCHANGE;
       String industry = "";
@@ -329,6 +348,44 @@ public class StockInfoCrawer {
         industry = removeWebSpaceString(tds.get(4).text());
         if (industry.isEmpty()) {
           break;
+        }
+
+        Stock entity = new Stock();
+        entity.setIndustry(industry);
+        entity.setType(type);
+
+
+        Integer number = removeWebSpaceInteger(tds.get(0).text().substring(0, 4));
+        String name = removeWebSpaceString(tds.get(0).text().substring(4));
+        entity.setName(name);
+        entity.setNumber(number);
+        entities.add(entity);
+      }
+      stockRepo.save(entities);
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void parseStockNumberType2(String url) {
+    try {
+      List<Stock> entities = new ArrayList<>();
+      int type = StockConstant.TYPE_OVER_THE_COUNTER;
+      String industry = "";
+      Document doc = Jsoup.connect(url).get();
+      Elements trs = doc.getElementsByTag("tr");
+      for (Element tr : trs) {
+        if (tr.equals(trs.get(0))) {
+          continue;
+        }
+        Elements tds = tr.getElementsByTag("td");
+        if (tds.size() < 2) {
+          continue;
+        }
+        industry = removeWebSpaceString(tds.get(4).text());
+        if (industry.isEmpty()) {
+          continue;
         }
 
         Stock entity = new Stock();

@@ -9,15 +9,15 @@ public class Capital {
   @Id
   private StockYearId id;
 
-  private Double cashIncrease;
+  private Long cashIncrease;
 
   private Double cashRatio;
 
-  private Double profitIncreate;
+  private Long profitIncreate;
 
   private Double profitRatio;
 
-  private Double other;
+  private Long other;
 
   private Double otherRatio;
 
@@ -29,11 +29,11 @@ public class Capital {
     this.id = id;
   }
 
-  public Double getCashIncrease() {
+  public Long getCashIncrease() {
     return cashIncrease;
   }
 
-  public void setCashIncrease(Double cashIncrease) {
+  public void setCashIncrease(Long cashIncrease) {
     this.cashIncrease = cashIncrease;
   }
 
@@ -45,11 +45,11 @@ public class Capital {
     this.cashRatio = cashRatio;
   }
 
-  public Double getProfitIncreate() {
+  public Long getProfitIncreate() {
     return profitIncreate;
   }
 
-  public void setProfitIncreate(Double profitIncreate) {
+  public void setProfitIncreate(Long profitIncreate) {
     this.profitIncreate = profitIncreate;
   }
 
@@ -61,11 +61,11 @@ public class Capital {
     this.profitRatio = profitRatio;
   }
 
-  public Double getOther() {
+  public Long getOther() {
     return other;
   }
 
-  public void setOther(Double other) {
+  public void setOther(Long other) {
     this.other = other;
   }
 

@@ -1,5 +1,7 @@
 package stock.db.repo;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -18,4 +20,9 @@ public interface EarningsRepo extends CrudRepository<Earnings, StockMonthId> {
 
   @Query(value = "select increase_ratey from earnings where year =?1 and month = ?2 and number = ?3", nativeQuery = true)
   public Double getRates(Integer year1, Integer month1, Integer stockNum);
+
+  @Query(value = "select earnings from earnings where year =?1 and month = ?2 and number = ?3", nativeQuery = true)
+  public Double getEarnings(Integer year1, Integer month1, Integer stockNum);
+
+  public List<Earnings> findByIdInOrderByIdYearDescIdMonthDesc(List<StockMonthId> ids);
 }

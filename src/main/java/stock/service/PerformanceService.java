@@ -41,7 +41,39 @@ public class PerformanceService {
         id.setYear(dq.getYear());
         ids.add(id);
       }
-      List<Performance> performances = performanceRepo.findByIdIn(ids);
+      List<Performance> performances = performanceRepo.findByIdInOrderByIdYearDescIdQuarterDesc(ids);
+      boolean isIncrease = true;
+      for (Performance performance : performances) {
+        isIncrease = isIncrease && performance.getEps() > 0;
+      }
+      if (isIncrease) {
+        results.add(stockNum);
+      }
+    }
+
+    return results;
+  }
+
+  public List<Integer> getContiniousPlusNQ(int q) {
+    List<Integer> stockNums = stockRepo.getNumbers();
+    List<Integer> results = new ArrayList<>();
+    if (q == 0) {
+      return stockNums;
+    }
+    for (Integer stockNum : stockNums) {
+      List<Object[]> yearQuarter = performanceRepo.getMaxQuarterByStockNum(stockNum);
+      List<DateQuarter> dqs =
+          TimeUtils.getClosestDateQuarter(Integer.valueOf(yearQuarter.get(0)[0].toString()),
+              Integer.valueOf(yearQuarter.get(0)[1].toString()), q);
+      List<StockQuarterId> ids = new ArrayList<>();
+      for (DateQuarter dq : dqs) {
+        StockQuarterId id = new StockQuarterId();
+        id.setNumber(stockNum);
+        id.setQuarter(dq.getQuarter());
+        id.setYear(dq.getYear());
+        ids.add(id);
+      }
+      List<Performance> performances = performanceRepo.findByIdInOrderByIdYearDescIdQuarterDesc(ids);
       boolean isIncrease = true;
       for (Performance performance : performances) {
         isIncrease = isIncrease && performance.getEps() > 0;
